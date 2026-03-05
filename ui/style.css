@@ -1,0 +1,74 @@
+body{
+margin:0;
+font-family:Arial;
+background:#f4f6f8;
+}
+
+.app{
+width:600px;
+margin:auto;
+height:100vh;
+display:flex;
+flex-direction:column;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:10px;
+background:#fff;
+border-bottom:1px solid #ddd;
+}
+
+.mode-toggle button{
+margin-left:5px;
+padding:6px 12px;
+border:none;
+cursor:pointer;
+}
+
+.mode-toggle .active{
+background:#007bff;
+color:white;
+}
+
+.chat{
+flex:1;
+padding:20px;
+overflow-y:auto;
+}
+
+.message{
+margin-bottom:15px;
+padding:10px;
+border-radius:10px;
+max-width:70%;
+}
+
+.user{
+background:#007bff;
+color:white;
+margin-left:auto;
+}
+
+.agent{
+background:#e4e6eb;
+}
+
+.input-area{
+display:flex;
+padding:10px;
+background:white;
+border-top:1px solid #ddd;
+}
+
+input{
+flex:1;
+padding:10px;
+margin:0 10px;
+}
+
+button{
+padding:8px 12px;
+}

@@ -1,0 +1,8 @@
+flask
+openai
+openai-whisper
+torch
+numpy
+soundfile
+sqlalchemy
+python-dotenv
