@@ -1,6 +1,4 @@
 import numpy as np
-
-
 class WERService:
 
     def calculate_wer(self, reference, hypothesis):

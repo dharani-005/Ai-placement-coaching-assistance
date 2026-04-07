@@ -9,7 +9,27 @@ client = OpenAI(
 
 class TeachingService:
 
+    def is_relevant_topic(self, text):
+
+        text = text.lower()
+
+        keywords = [
+            "oop", "object oriented", "class", "inheritance", "polymorphism",
+            "encapsulation", "abstraction",
+            "dbms", "database", "sql", "normalization",
+            "data structure", "algorithm", "stack", "queue", "tree", "graph",
+            "java", "python", "c++",
+            "operating system", "os", "process", "thread"
+        ]
+
+        return any(word in text for word in keywords)
+
+
     def generate_explanation(self, topic):
+
+        # Check if topic is relevant
+        if not self.is_relevant_topic(topic):
+            return "That topic is outside the interview preparation content."
 
         prompt = f"""
 Explain the following interview concept clearly and briefly.

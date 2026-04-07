@@ -83,6 +83,8 @@ def upload_audio():
 @interview_bp.route("/question", methods=["POST"])
 def ask_question():
 
+    global current_question
+
     if "file" not in request.files:
         return jsonify({"error": "No audio"}), 400
 
@@ -96,6 +98,7 @@ def ask_question():
     transcript = asr_result["transcript"]
 
     question = agent.generate_question(transcript)
+    current_question = question
 
     speech = tts.generate_speech(question)
 
@@ -104,6 +107,28 @@ def ask_question():
         "question": question,
         "audio": speech
     })
+
+@interview_bp.route("/text", methods=["POST"])
+def ask_text_question():
+
+    global current_question
+
+    data = request.get_json()
+    if not data or "prompt" not in data:
+        return jsonify({"error": "No prompt provided"}), 400
+
+    prompt = data["prompt"]
+    question = agent.generate_question(prompt)
+    current_question = question
+
+    speech = tts.generate_speech(question)
+
+    return jsonify({
+        "prompt": prompt,
+        "question": question,
+        "audio": speech
+    })
+
 @interview_bp.route("/answer", methods=["POST"])
 def evaluate_answer():
 
@@ -140,11 +165,11 @@ def evaluate_answer():
     )
 
     feedback_text = evaluator.generate_feedback(
-    current_question,
-    transcript,
-    score,
-    evaluation
-)
+        current_question,
+        transcript,
+        score,
+        evaluation
+    )
     speech = tts.generate_speech(feedback_text)
 
     return jsonify({

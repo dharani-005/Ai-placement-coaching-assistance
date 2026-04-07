@@ -1,7 +1,10 @@
-import random
-from app.services.question_bank import QUESTION_BANK
+from openai import OpenAI
 from app.services.interview_db_service import get_asked_questions, store_question
-
+from config import Config
+client = OpenAI(
+    api_key=Config.NAVIGATE_API_KEY,
+    base_url=Config.NAVIGATE_BASE_URL
+)
 
 class InterviewAgent:
 
@@ -10,31 +13,49 @@ class InterviewAgent:
         text = text.lower()
 
         if "oop" in text or "object" in text:
-            return "oop"
+            return "Object Oriented Programming"
 
         if "dbms" in text:
-            return "dbms"
+            return "Database Management Systems"
 
         if "self intro" in text or "introduce" in text:
-            return "hr"
+            return "HR introduction"
 
-        return "oop"
+        return "Object Oriented Programming"
 
 
-    def generate_question(self, text):
+    def generate_question(self, user_prompt):
 
-        topic = self.detect_topic(text)
+        topic = self.detect_topic(user_prompt)
 
-        questions = QUESTION_BANK[topic]
+        asked_questions = get_asked_questions()
 
-        asked = get_asked_questions()
+        prompt = f"""
+You are a professional technical interviewer.
 
-        available = [q for q in questions if q not in asked]
+Generate ONE natural interview question for a candidate.
 
-        if not available:
-            available = questions
+Topic: {topic}
 
-        question = random.choice(available)
+Rules:
+- Ask only ONE question
+- Keep it short
+- Make it sound natural like a real interviewer
+- Do NOT repeat these questions: {asked_questions}
+
+Example style:
+"Can you explain what polymorphism is in object oriented programming?"
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4.1-nano",
+            messages=[
+                {"role": "system", "content": "You are a professional interviewer."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        question = response.choices[0].message.content.strip()
 
         store_question(question)
 

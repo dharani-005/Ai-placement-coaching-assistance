@@ -1,44 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-<title>VoiceHire AI Agent</title>
-
-<link rel="stylesheet" href="style.css">
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voice AI</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
 
-<div class="app">
+<div class="page page--login active-page" id="loginPage">
+    <div class="login-shell">
+        <div class="login-card">
+            <div class="login-icon">🎙️</div>
+            <h1>Voice AI</h1>
+            <p class="login-subtitle">Welcome back! Please login to your account</p>
 
-<header>
-<h2>VoiceHire AI</h2>
+            <label class="input-label">
+                Username
+                <input type="text" id="username" placeholder="Enter your username" />
+            </label>
 
-<div class="mode-toggle">
+            <label class="input-label">
+                Password
+                <input type="password" id="password" placeholder="Enter your password" />
+            </label>
 
-<button id="interviewMode" class="active">Interview</button>
-<button id="teachingMode">Teaching</button>
+            <div class="login-row">
+                <a href="#" class="link-light">Forgot password?</a>
+            </div>
 
+            <button id="loginBtn" class="btn btn-primary">Login</button>
+
+            <div class="divider"><span>OR</span></div>
+
+            <button id="googleLoginBtn" class="btn btn-secondary">Continue with Google</button>
+
+            <p class="signup-text">Don't have an account? <a href="#">Sign up</a></p>
+        </div>
+    </div>
 </div>
 
-</header>
+<div class="page page--dashboard active-page" id="dashboardPage">
+    <div class="mode-selection-shell">
+        <div class="mode-selection-card">
+            <div class="login-icon">🎙️</div>
+            <h1>Select Mode</h1>
+            <p class="mode-selection-subtitle">Choose how you'd like to interact with the AI</p>
 
-<div id="chat" class="chat"></div>
+            <button id="selectInterviewMode" class="btn btn-primary">Interview Mode</button>
+            <button id="selectTeachingMode" class="btn btn-secondary">Teaching Mode</button>
 
-<div class="input-area">
-
-<button id="mic" type="button">🎤</button>
-
-<input type="text" id="textInput" placeholder="Type message...">
-
-<button id="send" type="button">Send</button>
-
+            <button id="logoutFromSelection" class="btn btn-secondary logout-selection">Logout</button>
+        </div>
+    </div>
 </div>
 
+<div class="page page--interview" id="interviewPage">
+    <main class="workspace">
+        <header class="workspace-header">
+            <div>
+                <p class="eyebrow">Interview Mode</p>
+                <h1>Practice Your Interview Skills</h1>
+                <p class="workspace-copy">Use voice or text to engage in interview conversations</p>
+            </div>
+            <div class="header-actions">
+                <div class="mode-toggle" role="tablist">
+                    <button id="switchToInterviewFromInterview" class="mode-pill mode-pill--active" role="tab" aria-selected="true">Interview</button>
+                    <button id="switchToTeachingFromInterview" class="mode-pill" role="tab" aria-selected="false">Teaching</button>
+                </div>
+                <button id="logoutFromInterview" class="btn btn-secondary logout-header">Logout</button>
+            </div>
+        </header>
+
+        <section class="workspace-body">
+            <div class="panel chat-panel">
+                <div class="chat-empty" id="chatEmptyInterview">
+                    <p class="empty-title">Interview conversation will appear here.</p>
+                    <p class="empty-copy">Use the microphone or type a prompt to begin the interview flow.</p>
+                </div>
+                <div class="chat-messages" id="chatMessagesInterview"></div>
+            </div>
+
+            <div class="suggestions-panel">
+                <h2>Interview Suggestions</h2>
+                <div class="suggestion-grid" id="suggestionsGridInterview"></div>
+            </div>
+        </section>
+
+        <footer class="chat-footer">
+            <button id="mic" class="icon-btn" aria-label="Record audio">🎤</button>
+            <div class="input-group">
+                <input type="text" id="textInput" placeholder="Type here..." autocomplete="off" />
+            </div>
+            <button id="send" class="send-btn" aria-label="Send message">➜</button>
+        </footer>
+    </main>
+</div>
+
+<div class="page page--teaching" id="teachingPage">
+    <main class="workspace">
+        <header class="workspace-header">
+            <div>
+                <p class="eyebrow">Teaching Mode</p>
+                <h1>Learn and Explore</h1>
+                <p class="workspace-copy">Ask questions and get detailed explanations</p>
+            </div>
+            <div class="header-actions">
+                <div class="mode-toggle" role="tablist">
+                    <button id="switchToInterviewFromTeaching" class="mode-pill" role="tab" aria-selected="false">Interview</button>
+                    <button id="switchToTeachingFromTeaching" class="mode-pill mode-pill--active" role="tab" aria-selected="true">Teaching</button>
+                </div>
+                <button id="logoutFromTeaching" class="btn btn-secondary logout-header">Logout</button>
+            </div>
+        </header>
+
+        <section class="workspace-body">
+            <div class="panel chat-panel">
+                <div class="chat-empty" id="chatEmptyTeaching">
+                    <p class="empty-title">Teaching conversation will appear here.</p>
+                    <p class="empty-copy">Use the microphone or type a question to begin the teaching flow.</p>
+                </div>
+                <div class="chat-messages" id="chatMessagesTeaching"></div>
+            </div>
+
+            <div class="suggestions-panel">
+                <h2>Teaching Suggestions</h2>
+                <div class="suggestion-grid" id="suggestionsGridTeaching"></div>
+            </div>
+        </section>
+
+        <footer class="chat-footer">
+            <button id="micTeaching" class="icon-btn" aria-label="Record audio">🎤</button>
+            <div class="input-group">
+                <input type="text" id="textInputTeaching" placeholder="Type here..." autocomplete="off" />
+            </div>
+            <button id="sendTeaching" class="send-btn" aria-label="Send message">➜</button>
+        </footer>
+    </main>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
