@@ -21,6 +21,12 @@ def create_app():
     def index():
         return send_from_directory("ui", "index.html")
 
+    @app.route("/uploads/<path:path>")
+    def serve_uploads(path):
+        if path and os.path.exists(os.path.join("uploads", path)):
+            return send_from_directory("uploads", path)
+        return "File not found", 404
+
     @app.route("/<path:path>")
     def serve_static(path):
         if path and os.path.exists(os.path.join("ui", path)):

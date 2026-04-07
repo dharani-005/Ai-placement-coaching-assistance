@@ -31,9 +31,10 @@ const suggestionsGridTeaching = document.getElementById('suggestionsGridTeaching
 
 const suggestionsByMode = {
     interview: [
-        'Practice an OOP interview question',
-        'Ask me a coding question',
-        'Evaluate my answer to a system design prompt'
+        'Object Oriented Programming',
+        'Database Management Systems',
+        'Data Structures and Algorithms',
+        'System Design'
     ],
     teaching: [
         'Explain recursion with an example',
@@ -56,6 +57,9 @@ function showInterviewPage() {
     mode = 'interview';
     activateHeaderToggle('interview');
     renderSuggestions();
+    if (chatMessagesInterview.children.length === 0) {
+        startInterview();
+    }
 }
 
 function showTeachingPage() {
@@ -106,6 +110,26 @@ function getActiveChatElements() {
     };
 }
 
+async function fetchJson(url, options) {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    if (!res.ok) {
+        let message = text;
+        try {
+            const data = JSON.parse(text);
+            message = data.error || data.message || text;
+        } catch (e) {
+            // Keep raw text when non-JSON error is returned.
+        }
+        throw new Error(message);
+    }
+    try {
+        return JSON.parse(text);
+    } catch (error) {
+        throw new Error('Invalid JSON response from server: ' + text);
+    }
+}
+
 function renderSuggestions() {
     if (mode === 'interview') {
         suggestionsGridInterview.innerHTML = '';
@@ -128,6 +152,18 @@ function renderSuggestions() {
     }
 }
 
+async function startInterview() {
+    try {
+        const data = await fetchJson('http://127.0.0.1:5000/interview/start');
+        addMessage(data.question, 'agent');
+        if (data.audio) {
+            addAudioMessage(data.audio);
+        }
+    } catch (error) {
+        addMessage('Error: ' + error.message, 'agent');
+    }
+}
+
 function clearChat() {
     const { messages, empty } = getActiveChatElements();
     messages.innerHTML = '';
@@ -147,41 +183,54 @@ function addMessage(text, sender) {
     messages.scrollTop = messages.scrollHeight;
 }
 
+function addAudioMessage(audioUrl) {
+    const { messages, empty } = getActiveChatElements();
+    empty.style.display = 'none';
+    if (!audioUrl.startsWith('http')) {
+        audioUrl = `${window.location.origin}/${audioUrl.replace(/^\/+/, '')}`;
+    }
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('message', 'agent', 'audio-message');
+    const audio = document.createElement('audio');
+    audio.controls = true;
+    audio.src = audioUrl;
+    audio.load();
+    wrapper.appendChild(audio);
+    messages.appendChild(wrapper);
+    messages.scrollTop = messages.scrollHeight;
+}
+
 async function handleSuggestion(suggestion) {
     addMessage(suggestion, 'user');
 
     if (mode === 'teaching') {
         try {
-            const res = await fetch('http://127.0.0.1:5000/teaching/text', {
+            const data = await fetchJson('http://127.0.0.1:5000/teaching/text', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ question: suggestion }),
             });
-            const data = await res.json();
             addMessage(data.explanation, 'agent');
             if (data.speech_file) {
-                const audio = new Audio(data.speech_file);
-                audio.play();
+                addAudioMessage(data.speech_file);
             }
         } catch (error) {
             addMessage('Error: ' + error.message, 'agent');
         }
     } else {
         try {
-            const res = await fetch('http://127.0.0.1:5000/interview/text', {
+            const data = await fetchJson('http://127.0.0.1:5000/interview/text', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ prompt: suggestion }),
             });
-            const data = await res.json();
             addMessage(data.question, 'agent');
             if (data.audio) {
-                const audio = new Audio('http://127.0.0.1:5000/' + data.audio);
-                audio.play();
+                addAudioMessage(data.audio);
             }
             waitingForAnswer = true;
         } catch (error) {
@@ -261,37 +310,42 @@ async function sendAudio(audioBlob) {
 
     try {
         if (mode === 'teaching') {
-            const res = await fetch('http://127.0.0.1:5000/teaching/ask', {
+            const data = await fetchJson('http://127.0.0.1:5000/teaching/ask', {
                 method: 'POST',
                 body: formData,
             });
-            const data = await res.json();
             addMessage(data.question, 'user');
             addMessage(data.explanation, 'agent');
             if (data.speech_file) {
-                const audio = new Audio(data.speech_file);
-                audio.play();
+                addAudioMessage(data.speech_file);
             }
         } else {
             const url = waitingForAnswer ? 'http://127.0.0.1:5000/interview/answer' : 'http://127.0.0.1:5000/interview/question';
-            const res = await fetch(url, {
+            const data = await fetchJson(url, {
                 method: 'POST',
                 body: formData,
             });
-            const data = await res.json();
             addMessage(data.transcript, 'user');
             if (waitingForAnswer) {
-                addMessage(data.feedback, 'agent');
                 if (data.audio) {
-                    const audio = new Audio('http://127.0.0.1:5000/' + data.audio);
-                    audio.play();
+                    addAudioMessage(data.audio);
                 }
-                waitingForAnswer = false;
+                if (data.feedback) {
+                    addMessage(data.feedback, 'agent');
+                }
+                if (data.question) {
+                    addMessage(data.question, 'agent');
+                }
+                if (data.next_question) {
+                    addMessage(data.next_question, 'agent');
+                    waitingForAnswer = true;
+                } else {
+                    waitingForAnswer = false;
+                }
             } else {
                 addMessage(data.question, 'agent');
                 if (data.audio) {
-                    const audio = new Audio('http://127.0.0.1:5000/' + data.audio);
-                    audio.play();
+                    addAudioMessage(data.audio);
                 }
                 waitingForAnswer = true;
             }
@@ -310,38 +364,59 @@ async function sendTextMessage() {
 
     if (mode === 'teaching') {
         try {
-            const res = await fetch('http://127.0.0.1:5000/teaching/text', {
+            const data = await fetchJson('http://127.0.0.1:5000/teaching/text', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ question: text }),
             });
-            const data = await res.json();
             addMessage(data.explanation, 'agent');
             if (data.speech_file) {
-                const audio = new Audio(data.speech_file);
-                audio.play();
+                addAudioMessage(data.speech_file);
             }
         } catch (error) {
             addMessage('Error: ' + error.message, 'agent');
         }
     } else {
         try {
-            const res = await fetch('http://127.0.0.1:5000/interview/text', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ prompt: text }),
-            });
-            const data = await res.json();
-            addMessage(data.question, 'agent');
-            if (data.audio) {
-                const audio = new Audio('http://127.0.0.1:5000/' + data.audio);
-                audio.play();
+            if (waitingForAnswer) {
+                const data = await fetchJson('http://127.0.0.1:5000/interview/answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ answer: text }),
+                });
+                if (data.audio) {
+                    addAudioMessage(data.audio);
+                }
+                if (data.feedback) {
+                    addMessage(data.feedback, 'agent');
+                }
+                if (data.question) {
+                    addMessage(data.question, 'agent');
+                }
+                if (data.next_question) {
+                    addMessage(data.next_question, 'agent');
+                    waitingForAnswer = true;
+                } else {
+                    waitingForAnswer = false;
+                }
+            } else {
+                const data = await fetchJson('http://127.0.0.1:5000/interview/text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: text }),
+                });
+                addMessage(data.question, 'agent');
+                if (data.audio) {
+                    addAudioMessage(data.audio);
+                }
+                waitingForAnswer = true;
             }
-            waitingForAnswer = true;
         } catch (error) {
             addMessage('Error: ' + error.message, 'agent');
         }

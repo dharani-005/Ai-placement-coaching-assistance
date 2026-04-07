@@ -51,27 +51,26 @@ Example Output:
         return json.loads(content)
     def generate_feedback(self, question, answer, score, evaluation):
 
-        prompt = prompt = f"""
-    You are a professional technical interviewer.
+        prompt = f"""
+You are a professional technical interviewer.
 
-    Interview Question:
-    {question}
+Interview Question:
+{question}
 
-    Candidate Answer:
-    {answer}
+Candidate Answer:
+{answer}
 
-    Evaluation Metrics:
-    Relevance: {evaluation['relevance']}
-    Keyword Coverage: {evaluation['keyword_coverage']}
-    Structure Clarity: {evaluation['structure_clarity']}
-    Final Score: {score['final_score']}
+Evaluation Metrics:
+Relevance: {evaluation['relevance']}
+Keyword Coverage: {evaluation['keyword_coverage']}
+Structure Clarity: {evaluation['structure_clarity']}
+Final Score: {score['final_score']}
 
-    Provide human-like feedback for the candidate.
-    Explain what was good and what could be improved.
-    Do not mention numeric scores.
-    Keep it short (3–4 sentences).
-    Speak conversationally as if you are directly talking to the candidate.
-    """
+Provide a short, professional feedback response in 2-3 sentences.
+Do not say "correct" or "wrong".
+Do not mention numeric scores.
+Keep the tone concise and focused on what was good and what can be improved.
+"""
 
         response = client.chat.completions.create(
             model="gpt-4.1-nano",

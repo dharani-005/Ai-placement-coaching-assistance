@@ -8,25 +8,7 @@ client = OpenAI(
 
 class InterviewAgent:
 
-    def detect_topic(self, text):
-
-        text = text.lower()
-
-        if "oop" in text or "object" in text:
-            return "Object Oriented Programming"
-
-        if "dbms" in text:
-            return "Database Management Systems"
-
-        if "self intro" in text or "introduce" in text:
-            return "HR introduction"
-
-        return "Object Oriented Programming"
-
-
-    def generate_question(self, user_prompt):
-
-        topic = self.detect_topic(user_prompt)
+    def generate_question(self, topic, difficulty):
 
         asked_questions = get_asked_questions()
 
@@ -36,11 +18,13 @@ You are a professional technical interviewer.
 Generate ONE natural interview question for a candidate.
 
 Topic: {topic}
+Difficulty: {difficulty}
 
 Rules:
 - Ask only ONE question
 - Keep it short
 - Make it sound natural like a real interviewer
+- Keep the difficulty aligned with the given level
 - Do NOT repeat these questions: {asked_questions}
 
 Example style:

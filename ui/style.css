@@ -14,10 +14,14 @@
 html, body {
     margin: 0;
     min-height: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 body {
     background: linear-gradient(180deg, #edf2ff 0%, #f8fbff 100%);
+    height: 100vh;
+    overflow: hidden;
 }
 
 button, input {
@@ -26,7 +30,8 @@ button, input {
 
 .page {
     display: none;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .active-page {
@@ -380,10 +385,22 @@ button:focus, input:focus {
     color: white;
 }
 
+.workspace {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+}
+
 .workspace-body {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
     gap: 28px;
+    grid-auto-rows: 1fr;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .panel {
@@ -391,12 +408,16 @@ button:focus, input:focus {
     border-radius: 32px;
     padding: 30px;
     box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .chat-panel {
     display: flex;
     flex-direction: column;
-    min-height: 480px;
+    min-height: 0;
+    flex: 1;
 }
 
 .chat-empty {
@@ -416,13 +437,38 @@ button:focus, input:focus {
 }
 
 .chat-messages {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 16px;
     overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding-right: 8px;
+    scroll-behavior: smooth;
+}
+
+.chat-panel .chat-messages {
+    scrollbar-width: thin;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 999px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
 }
 
 .message {
-    max-width: 80%;
+    max-width: 70%;
+    width: fit-content;
+    min-width: 140px;
     padding: 18px 22px;
     border-radius: 24px;
     line-height: 1.6;
@@ -436,9 +482,15 @@ button:focus, input:focus {
 }
 
 .message.agent {
+    margin-right: auto;
     background: #f8fbff;
     border: 1px solid #dbe4ff;
     color: #0f172a;
+}
+
+.audio-message {
+    padding: 14px 18px;
+    background: #eff6ff;
 }
 
 .suggestions-panel h2 {
