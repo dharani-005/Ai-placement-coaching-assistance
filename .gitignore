@@ -14,6 +14,11 @@ uploads/
 *.mp3
 *.wav
 
+# Large model files and snapshots
+models/
+*.bin
+*.json
+
 # IDE and editor files
 .vscode/
 .idea/
